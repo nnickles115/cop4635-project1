@@ -34,7 +34,6 @@
 # Misc
 .vscode/
 build/
-README*
 *.pdf
 *.docx
 server
