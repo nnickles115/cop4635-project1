@@ -1,0 +1,82 @@
+<!--
+file: testPOST.html
+brief: This page sends a POST request to the server and displays the server's response.
+
+author: Noah Nickles
+date: 1/20/2025
+details: COP4635 Sys & Net II - Project 1
+-->
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>POST Request Test</title>
+    <style>
+        body {
+            background-color: #99CC99;
+            color: #000000;
+        }
+        a {
+            color: #2020FF;
+        }
+        a:visited {
+            color: #4040CC;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html">Click here to go back to index.html</a></br></br>
+
+    <form id="commentForm" action="/submit" method="post">
+        <label for="comment">Comment:</label>
+        <input type="text" id="comment" name="comment" value="Hello!"/>
+        <button type="submit">Submit</button>
+    </form>
+    <span id="serverReply"></span>
+
+    <script>
+        document.getElementById('commentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new URLSearchParams(new FormData(this));
+
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // Access the response status code
+                console.log('Status:', response.status);
+
+                // Access the response headers (as a Headers object)
+                const headers = response.headers;
+                console.log('Headers:', headers);
+                console.log('Content-Type:', headers.get('Content-Type'));
+
+                // Access the response body (you need to choose how to parse it)
+                if(response.headers.get('Content-Type').startsWith('application/json')) {
+                    return response.json(); // Parse as JSON
+                } 
+                else if(response.headers.get('Content-Type').startsWith('text/plain')) {
+                    return response.text(); // Parse as plain text
+                } 
+                else if (response.headers.get('Content-Type').startsWith('text/html')) {
+                    return response.text(); // Parse as plain text
+                } 
+                else {
+                    // Handle other content types
+                    return response.blob();
+                }
+            })
+            .then(data => {
+                // 'data' will contain the parsed response body
+                console.log('Response Body:', data);
+                document.getElementById('serverReply').innerText = data;
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

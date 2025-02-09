@@ -1,0 +1,153 @@
+<!--
+file: tlr-calculator.html
+brief: This page will allow students to calculate the amount of time they should spend 
+       studying based on the number of credits they are taking.
+
+author: Noah Nickles
+updated: 1/30/2025
+personal email: nnickles98@gmail.com
+student email: npn4@students.uwf.edu
+ -->
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Management Calculator | University of West Florida</title>
+    <link rel="preload" href="../assets/fonts/gotham/bold/gotham-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="../assets/fonts/gotham/book/gotham-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="../assets/fonts/gotham/black/gotham-black.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="../assets/fonts/gotham/light/gotham-light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="../assets/fonts/helvetica-neue/light-condensed/helvetica-neue-light-condensed.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="../assets/css/tlr-calculator-styles.css" as="style">
+    <link rel="stylesheet" href="../assets/css/tlr-calculator-styles.css">
+    
+</head>
+<body>
+    <header>
+        <a href="../index.html">Click here to go back to index.html</a>
+        <h1>Time Management Calculator</h1>
+        <p>[description of why using this calculator is helpful]</p>
+        <!-- Instructions for using the calculator -->
+        <section>
+            <h2>How to use this calculator:</h2>
+            <ul>
+                <li>
+                    Enter the number of credits you are taking.
+                    The calculator will automatically calculate the number of hours recommended to study.
+                    Ideally, for every hour you are in class, 2-3 hours should be spent outside of class studying.
+                    This number is adjustable if you believe you require less studying.
+                </li>
+                <li>
+                    Enter the number of hours spent on other activities.
+                    By default, it is assumed that you are getting 8 hours of sleep per night.
+                    Whether the amount is more or less, having a consistent schedule is very helpful.
+                </li>
+                <li>
+                    Based on your results, adjust your time as needed to help better balance your work/life schedule.
+                </li>
+            </ul>
+        </section>
+    </header>
+<main>
+    <div class="calculator-container">
+        <h2>Time Management Calculator</h2>
+        <div class="chart-container">
+            <canvas id="pie-chart" width="300" height="300"></canvas>
+        </div>
+        <!-- Time Container -->
+        <div class="time-container">
+            <h3>Hours in a week</h3>
+            <span id="hours-week">168</span>
+            <div class="divider"></div>
+            <h3>Hours Remaining</h3>
+            <span id="hours-left">168</span>
+        </div>
+        <!-- Slider Container -->
+        <div class="slider-container">
+            <label>Credit Hours<span id="slider-credits">1</span></label>
+            <input id="slider" name="slider" type="range" min="1" max="21" value="3" step="1">
+        </div>
+        <!-- Input Container -->
+        <div class="input-container">
+            <div class="input-group">
+                <input id="credit-hours" name="credit-hours" type="number" min="1" max="21" value="3">
+                <label for="credit-hours">Attending Class</label>
+                <span id="credit-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="study-hours" name="study-hours" type="number" min="0" max="70" value="3">
+                <label for="study-hours">Studying</label>
+                <span id="study-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="work-hours" name="work-hours" type="number" min="0" max="50" value="0">
+                <label for="work-hours">Working</label>
+                <span id="work-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="commute-hours" name="commute-hours" type="number" min="0" max="20" value="0">
+                <label for="commute-hours">Commuting</label>
+                <span id="commute-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="eating-hours" name="eating-hours" type="number" min="0" max="14" value="0">
+                <label for="eating-hours">Eating</label>
+                <span id="eating-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="sleeping-hours" name="sleeping-hours" type="number" min="0" max="70" value="56">
+                <label for="sleeping-hours">Sleeping</label>
+                <span id="sleeping-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="hygiene-hours" name="hygiene-hours" type="number" min="0" max="14" value="0">
+                <label for="hygiene-hours">Personal Hygiene</label>
+                <span id="hygiene-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="org-hours" name="org-hours" type="number" min="0" max="20" value="0">
+                <label for="org-hours">Student Organizations</label>
+                <span id="org-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="rec-hours" name="rec-hours" type="number" min="0" max="20" value="0">
+                <label for="rec-hours">Recreation/Self-care</label>
+                <span id="rec-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="chore-hours" name="chore-hours" type="number" min="0" max="20" value="0">
+                <label for="chore-hours">Household Duties</label>
+                <span id="chore-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="social-hours" name="social-hours" type="number" min="0" max="20" value="0">
+                <label for="social-hours">Socializing</label>
+                <span id="social-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="screen-hours" name="screen-hours" type="number" min="0" max="70" value="0">
+                <label for="screen-hours">Screen Time</label>
+                <span id="screen-hours-percentage"></span>
+            </div>
+            <div class="input-group">
+                <input id="other-hours" name="other-hours" type="number" min="0" max="50" value="0">
+                <label for="other-hours">Other</label>
+                <span id="other-hours-percentage"></span>
+            </div>
+        </div>
+        <!-- Button Container -->
+        <div class="button-container">
+            <button id="reset-button">Reset to Default</button>
+        </div>
+    </div>
+</main>
+    <footer>
+        <noscript>Please enable JavaScript in your web browser to view this content.</noscript>
+    </footer>
+    
+    <script src="../assets/js/chart.umd.js" defer="defer"></script>
+    <script src="../assets/js/tlr-calculator-script.js" defer="defer"></script>
+</body>
+</html>

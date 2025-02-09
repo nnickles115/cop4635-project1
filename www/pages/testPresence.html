@@ -1,0 +1,42 @@
+<!--
+file: testPresence.html
+brief: This page tests the server's ability to serve static content.
+
+author: Dr. Mishra 
+modified by: Noah Nickles
+date: 1/20/2025
+details: COP4635 Sys & Net II - Project 1
+-->
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>LIKE WOW</title>
+    <link rel="stylesheet" href="../assets/css/modal-styles.css">
+    <script defer src="../assets/js/modal.js"></script>
+    <style>
+        body {
+            background-color: #99CC99;
+            color: #000000;
+        }
+        a {
+            color: #2020FF;
+        }
+        a:visited {
+            color: #4040CC;
+        }
+    </style>
+</head>
+<div id="picModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="img">
+    <div id="caption"></div>
+</div>
+<body>
+    <a href="../index.html">Click here to go back to index.html</a>
+    <p>IMAGE</p>
+    <img src="../assets/images/img.jpg" alt="raptor jesus" onclick="openModal(this)" class="clickable-image"/>
+    <p>IMAGE</p>
+</body>
+</html>

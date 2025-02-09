@@ -1,0 +1,439 @@
+/* 
+file: tlr-calculator-styles.css
+brief: Style sheet for Time Management Calculator.
+
+author: Noah Nickles
+date: 5/23/2024
+personal email: nnickles98@gmail.com
+student email: npn4@students.uwf.edu
+*/
+
+/* Style Guidelines
+Style Poster: https://uwf.edu/media/brand-portal/digital-assets-and-templates/Brand-at-a-Glance.pdf
+Color: https://uwf.edu/brand/color/
+Typography: https://uwf.edu/brand/typography/
+Fonts: https://uwf.edu/brand/typography/headlines-subheads-and-body-copy/
+Logos: https://uwf.edu/brand/logo-basics/
+*/
+
+/* ========================================
+   Variables
+   ======================================== */
+:root {
+  /* Primary Colors */
+  --uwf_blue: #004C97;
+  --uwf_green: #007A33;
+
+  /* Secondary Colors */
+  --armadillo_grey: #666666;
+  --cannon_green: #40A829;
+  --luna_blue: #8DC8E8;
+  --nautilus_blue: #009CDE;
+  --spring_green: #97C800;
+
+  /* Tertiary Colors */
+  --midnight_blue: #003865;
+  --pine_green: #215732;
+
+  /* Accents */
+  --azalea: #DF1995;
+  --camelia: #E03C31;
+  --earth: #674230;
+  --lime: #C4D600;
+  --marigold: #FFB81C;
+  --ocean: #00ABC8;
+  --regal: #753BBD;
+  --sand: #B6ADA5;
+
+  /* Custom */
+  --background-grey: #DDD;
+}
+
+/* ========================================
+   Font Faces
+   ======================================== */
+@font-face { /* Use for bolding in paragraphs and links with backgrounds */
+  font-display: swap;
+  font-family: "GothamBold";
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 700;
+  src: url("../fonts/gotham/bold/gotham-bold.woff2") format("woff2");
+}
+
+@font-face { /* Use for paragraphs */
+  font-display: swap;
+  font-family: "GothamBook";
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 300;
+  src: url("../fonts/gotham/book/gotham-book.woff2") format("woff2");
+}
+
+@font-face { /* Use for sub headers */
+  font-display: swap;
+  font-family: "GothamBlack";
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 900;
+  src: url("../fonts/gotham/black/gotham-black.woff2") format("woff2");
+}
+
+@font-face { /* Use for headers backup */
+  font-display: swap;
+  font-family: "GothamLight";
+  font-stretch: condensed;
+  font-style: normal;
+  font-weight: 300;
+  src: url("../fonts/gotham/light/gotham-light.woff2") format("woff2");
+}
+
+@font-face { /* Use for headers */
+  font-display: swap;
+  font-family: "HelveticaNeueLightCondensed";
+  font-stretch: condensed;
+  font-style: normal;
+  font-weight: 100;
+  src: url("../fonts/helvetica-neue/light-condensed/helvetica-neue-light-condensed.woff2") format("woff2");
+}
+
+/* ========================================
+   Global Styles
+   ======================================== */
+body {
+  background-color: white;
+  font-family: "GothamBook", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font-family: "GothamBold", Arial, sans-serif;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--uwf_blue);
+  color: white;
+  font-family: "GothamBook", Arial, sans-serif;
+  font-weight: 300;
+}
+
+footer p {
+  margin: 0;
+}
+
+header > h2 {
+  font-family: "GothamBold", Arial, sans-serif;
+}
+
+
+
+header {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  margin-left: 9%;
+  max-width: 800px;
+  min-width: 800px;
+  padding: 0;
+}
+
+header > h1 {
+  color: black;
+  font-family: "HelveticaNeueLightCondensed", "GothamLight", Arial, sans-serif;
+  font-size: 64px;
+  font-weight: 100;
+  margin-bottom: 10px;
+}
+
+header section {
+  flex: 1;
+}
+
+main {
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  min-height: 100vh;
+  width: 100%;
+  padding: 30px;
+  margin-left: 7%;
+  box-sizing: border-box;
+}
+
+ol, p {
+  font-family: "GothamBook", Arial, sans-serif;
+}
+
+/* ========================================
+   Calculator Styles
+   ======================================== */
+.calculator-container {
+  background-image: url(../images/nautilus-shell-pattern-vertical-white-blue-1.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: grid;
+  gap: 20px;
+  grid-template-areas:
+    "title title title"
+    ". time ."
+    "slider slider slider"
+    "input input chart"
+    ". button .";
+  grid-template-columns: 1fr 1fr 1fr;
+  min-width: 800px;
+  max-width: 800px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.calculator-container h2 {
+  background-color: var(--uwf_blue);
+  box-sizing: border-box;
+  color: white;
+  font-family: "GothamBold", Arial, sans-serif;
+  font-size: 2rem;
+  grid-area: title;
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.chart-container {
+  grid-area: chart;
+  margin-left: -25%;
+  width: 100%;
+}
+
+.time-container {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  grid-area: time;
+  margin-left: 15%;
+  text-wrap: nowrap;
+  width: 100%;
+}
+
+.time-container .divider {
+  background-color: #DDD;
+  height: 2px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.time-container span {
+  color: var(--uwf_blue);
+  font-family: "GothamBold", Arial, sans-serif;
+  font-size: large;
+  margin: 0;
+}
+
+.time-container > h3 {
+  font-family: "GothamLight", Arial, sans-serif;
+  margin: 0;
+}
+
+/* ========================================
+   Slider Styles
+   ======================================== */
+.slider-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  grid-area: slider;
+  width: 100%;
+}
+
+.slider-container input {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #DDD;
+  border-radius: 5px;
+  height: 8px;
+  outline: none;
+  width: 87%;
+}
+
+.slider-container label {
+  display: flex;
+  flex-direction: row;
+  font-family: "GothamBook", Arial, sans-serif;
+  padding-bottom: 10px;
+  width: 87%; /* Match width of slider to align text */
+}
+
+.slider-container label span#slider-credits {
+  color: var(--uwf_blue);
+  font-family: "GothamBlack", Arial, sans-serif;
+  margin-left: 5px;
+}
+
+.slider-container input::-moz-range-thumb {
+  background: var(--luna_blue);
+  border: 2px solid var(--midnight_blue);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  height: 20px;
+  width: 20px;
+}
+
+.slider-container input::-moz-range-track {
+  background: #DDD;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 8px;
+  width: 100%;
+}
+
+.slider-container input:active::-moz-range-track {
+  background: #CCC;
+}
+
+.slider-container input::-moz-range-thumb:hover {
+  background: var(--nautilus_blue);
+}
+
+.slider-container input:active::-moz-range-thumb {
+  background: var(--uwf_blue);
+}
+
+.slider-container input:active::-webkit-slider-runnable-track {
+  background: #CCC;
+}
+
+.slider-container input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--luna_blue);
+  border: 2px solid var(--midnight_blue);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  height: 20px;
+  margin-top: -6px;
+  width: 20px;
+}
+
+.slider-container input::-webkit-slider-runnable-track {
+  background: #DDD;
+  border-radius: 5px;
+  cursor: pointer;
+  height: 8px;
+  width: 100%;
+}
+
+.slider-container input:active::-webkit-slider-thumb {
+  background: var(--uwf_blue);
+}
+
+.slider-container input::-webkit-slider-thumb:hover {
+  background: var(--nautilus_blue);
+}
+
+/* ========================================
+   Input Styles
+   ======================================== */
+.input-container {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  grid-area: input;
+  margin-left: 11%;
+  width: 87%;
+}
+
+.input-container .input-group input {
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: "GothamBook", Arial, sans-serif;
+  font-size: 14px;
+  height: 25px;
+  margin-bottom: 15px;
+  text-align: center;
+  width: 50px;
+}
+
+.input-container .input-group input:focus {
+  border: 3px solid var(--uwf_blue);
+  outline: none;
+}
+
+.input-container .input-group label {
+  font-family: "GothamBook", Arial, sans-serif;
+  margin-left: 5px;
+}
+
+.input-container .input-group:last-child {
+  margin-bottom: -20px;
+}
+
+.input-container .input-group span {
+  background-color: var(--luna_blue);
+  border-radius: 20px;
+  color: white;
+  font-family: "GothamBold", Arial, sans-serif;
+  font-size: 12px;
+  margin-left: 5px;
+  padding: 2px 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ========================================
+   Button Styles
+   ======================================== */
+
+.button-container {
+  align-items: center;
+  display: flex;
+  grid-area: button;
+  margin-bottom: 20px;
+  margin-left: 30%;
+  width: 100%;
+}
+
+.button-container button {
+  background-color: var(--uwf_blue);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-family: "GothamBold", Arial, sans-serif;
+  font-weight: 700;
+  padding: 10px 20px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  width: auto;
+}
+
+.button-container button:active {
+  background-color: var(--midnight_blue);
+}
+
+.button-container button:hover {
+  background-color: var(--nautilus_blue);
+}
+
+/* ========================================
+   Media Queries
+   ======================================== */
+/* Tablets */
+/*@media (max-width: 768px) {
+
+}*/
+
+/* Phones */
+/*@media (max-width: 480px) {
+
+}*/

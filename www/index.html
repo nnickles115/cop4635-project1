@@ -1,0 +1,80 @@
+<!--
+file: index.html
+brief: This is the main page that the server will send to the client.
+       It contains links to other pages that the server will send to the client.
+       It also contains a modal that will display an image when clicked.
+
+author: Dr. Mishra
+modified by: Noah Nickles
+date: 1/20/2025
+details: COP4635 Sys & Net II - Project 1
+-->
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>Server Test Page</title>
+    <link rel="stylesheet" href="assets/css/modal-styles.css">
+    <script defer src="assets/js/modal.js"></script>
+    <style>
+        body {
+            background-color: #99CC99;
+            color: #000000;
+        }
+        a {
+            color: #2020FF;
+        }
+        a:visited {
+            color: #4040CC;
+        }
+    </style>
+</head>
+<div id="picModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="img" alt="">
+    <div id="caption"></div>
+</div>
+<body>
+    </p>TEST....</p>
+    <h3>The server has successully started and is sending you this page.</h3>
+    <p>If the server can successfully find and send you the image, it will show up in the subsequent page.</p>
+    <p>IMAGE LINK: <a href="pages/testPresence.html">Click on this link for an image</a></p>
+    <p>NONEXISTANT LINK: <a href="fake.html">Click here to test the non-existent link</a></p>
+    <p>POST REQUEST TEST: <a href="pages/testPOST.html">Test form submission</a></p>
+
+    <hr color="#000000" size="2">
+    <section>
+        <h2>Time Management Calculator</h2>
+        <p><a href="pages/tlr-calculator.html">Click here to view the time management calculator</a></p>
+    </section>
+
+    <section>
+        <h3>About:</h3>
+        <p>
+            I work on campus as a Local Support Provider for the Division of Academic Engagement and Student Affairs.</br>
+            Tutoring and Learning Resources is one of the departments that we service.</br>
+            </br>
+            One of the staff members asked me if I could create a time management calculator for students as they were</br>
+            currently using another university's website.</br>
+            </br>
+            Wanting to practice my programming skills, I created this calculator in May 2024, but they have yet to see about</br> 
+            getting it added to their deparment site.</br>
+            </br>
+            I figured I would take the opportunity to show off my work given we are allowed to modify the html files in this project.</br>
+        </p>
+    </section>
+
+    <section>
+        <h3>Side Note:</h3>
+        <p>
+            I also created a client-only Windows 11 app in C# using WPF for the Dean of Student's food pantry; another department that we service.</br>
+            The app stores inventory information and transactions of items that students get, then stores the data in a local SQLite database.</br>
+            </br>
+            That was a fun project to work on, but it took me the entire month of August 2024 to complete.</br>
+            They just started using it this semester, so I am happy to see that it is being used.</br>
+        </p>
+        <img src="assets/images/argo-pantry.png" alt="ArgoPantry Database App" width="850" height="475" onclick="openModal(this)" class="clickable-image"/>
+    </section>
+</body>
+</html>
