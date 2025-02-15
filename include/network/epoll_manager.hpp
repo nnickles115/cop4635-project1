@@ -27,21 +27,21 @@
 class EpollManager {
 public:
     // Constructors //
-
     explicit EpollManager(int maxEvents = 10);
     ~EpollManager();
 
-    // Functions //
+    // Getters //
+    int get() const { return epoll_fd; }
+    int getWakeupFd() const { return wakeup_fd; }
 
+    // Functions //
     void addSocket(const Socket& socket, uint32_t events);
     void removeSocket(int fd);
     std::vector<epoll_event> waitForEvents(int timeout_ms = -1) const;
     void wakeup();
-    int getWakeupFd() const { return wakeup_fd; }
 
 private:
     // Variables //
-
     int epoll_fd;
     int max_events;
     int wakeup_fd;

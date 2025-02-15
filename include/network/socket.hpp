@@ -64,8 +64,10 @@ public:
     ssize_t sendfile(int file_fd, off_t* offset, size_t count) const;
 
 private:
-    // Socket //
+    // Helpers //
+    bool waitForEvent(short event_mask, int timeout_ms) const;
 
+    // Variables //
     int socket_fd;
 };
 

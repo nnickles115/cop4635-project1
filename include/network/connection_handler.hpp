@@ -60,7 +60,7 @@ private:
     std::shared_ptr<ResponseComposer> composer;
 
     // Helpers //
-
+    bool waitForSocketEvent(int fd, short event_mask, int timeout_ms);
     bool waitForData();
 
     // Functions //
@@ -68,7 +68,7 @@ private:
     bool handleRequest();
     HttpRequest parseRequest();
     void sendResponse(HttpResponse& response);
-    void sendErrorResponse(const http::status::Code& code);
+    void sendErrorResponse(HttpResponse& response, const http::status::Code& code);
 };
 
 #endif // CONNECTION_HANDLER_HPP

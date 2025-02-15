@@ -26,7 +26,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstring>
+#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -66,12 +68,7 @@ ConnectionHandler::~ConnectionHandler() {
 void ConnectionHandler::processRequests() {
     int requestCount = 0;
     do {
-        if(!waitForData()) {
-            if(requestCount > 0) {
-                Logger::getInstance().log("Keep-Alive timeout reached.", Logger::LogLevel::INFO);
-            }
-            break; // No data received within timeout -> close connection
-        }
+        if(!waitForData()) break; // No data received within timeout -> close connection
 
         // Handle the request
         bool keepAlive = handleRequest();
@@ -92,41 +89,53 @@ void ConnectionHandler::processRequests() {
  * @return `true` if data is available, `false` if a timeout occurred.
  */
 bool ConnectionHandler::waitForData() {
-    // Poll in short intervals (e.g. 100ms) until the total elapsed time reaches KEEP_ALIVE_TIMEOUT
     const int shortTimeoutMs = 100;
+    const int proactiveTimeoutMs = 500;
     int totalElapsedMs = 0;
 
     while(HttpServer::isRunning() && totalElapsedMs < KEEP_ALIVE_TIMEOUT) {
-        struct pollfd pfd;
-        pfd.fd = client_socket->get();
-        pfd.events = POLLIN;
+        if(waitForSocketEvent(client_socket->get(), POLLIN, shortTimeoutMs)) {
+            return true;
+        }
+        totalElapsedMs += shortTimeoutMs;
 
-        // Convert the short timeout to timespec for ppoll
-        struct timespec timeout;
-        timeout.tv_sec = shortTimeoutMs / 1000;
-        timeout.tv_nsec = (shortTimeoutMs % 1000) * 1000000;
-
-        int ret = ppoll(&pfd, 1, &timeout, nullptr);
-        if(ret < 0) {
-            if(errno == EINTR) {
-                Logger::getInstance().log("PPoll interrupted by signal.", Logger::LogLevel::DEBUG);
-                return false; // Interrupted by signal
-            }
-            Logger::getInstance().log("PPoll error: " + std::string(std::strerror(errno)), Logger::LogLevel::DEBUG);
+        // Check for proactive closure (no data received within timeout)
+        if(totalElapsedMs >= proactiveTimeoutMs) {
+            Logger::getInstance().log("Proactive closure: no data within " +
+                std::to_string(proactiveTimeoutMs) + "ms.", Logger::LogLevel::INFO);
             return false;
         }
-        else if(ret > 0 && (pfd.revents & POLLIN)) {
-            return true; // Data is available
-        }
-
-        totalElapsedMs += shortTimeoutMs;
     }
 
     if(totalElapsedMs >= KEEP_ALIVE_TIMEOUT) {
         Logger::getInstance().log("Keep-Alive timeout reached.", Logger::LogLevel::INFO);
     }
+    return false;
+}
 
-    return false; // No data available within timeout or shutdown signaled
+/**
+ * @brief Waits for a socket event to occur.
+ * @param fd The file descriptor to wait on.
+ * @param event_mask The event mask to wait for.
+ * @param timeout_ms The timeout in milliseconds.
+ * @return `true` if the event occurred, `false` if a timeout occurred.
+ * @throws std::runtime_error if the ppoll system call fails.
+ */
+bool ConnectionHandler::waitForSocketEvent(int fd, short event_mask, int timeout_ms) {
+    struct pollfd pfd;
+    pfd.fd = fd;
+    pfd.events = event_mask;
+
+    // Convert timeout_ms to timespec for ppoll()
+    struct timespec timeout;
+    timeout.tv_sec = timeout_ms / 1000;
+    timeout.tv_nsec = (timeout_ms % 1000) * 1000000;
+
+    int ret = ppoll(&pfd, 1, &timeout, nullptr);
+    if(ret < 0) {
+        throw std::runtime_error("ppoll failed: " + std::string(std::strerror(errno)));
+    }
+    return (ret > 0) && (pfd.revents & event_mask);
 }
 
 /**
@@ -157,7 +166,7 @@ bool ConnectionHandler::handleRequest() {
             response = responseResult.getResponse();
         }
         else {
-            response = composer->composeErrorMessage(responseResult.getError());
+            composer->composeErrorMessage(response, responseResult.getError());
         }
 
         // Determine if connection should be kept alive
@@ -188,11 +197,13 @@ bool ConnectionHandler::handleRequest() {
         else {
             Logger::getInstance().log(std::string(e.what()), Logger::LogLevel::ERROR);
         }
-        sendErrorResponse(http::status::Code::BAD_REQUEST);
+        HttpResponse response;
+        sendErrorResponse(response, http::status::Code::BAD_REQUEST);
         return false;
     }
     catch(const std::exception& e) {
-        sendErrorResponse(http::status::Code::INTERNAL_SERVER_ERROR);
+        HttpResponse response;
+        sendErrorResponse(response, http::status::Code::INTERNAL_SERVER_ERROR);
         return false;
     }
 }
@@ -248,21 +259,19 @@ void ConnectionHandler::sendResponse(HttpResponse& response) {
 
     // Send HTTP headers, MSG_NOSIGNAL to prevent SIGPIPE (broken pipe)
     if(client_socket->send(responseHeadersStr.c_str(), responseHeadersStr.size(), MSG_NOSIGNAL) < 0) {
-        Logger::getInstance().log("Failed to send response headers.", Logger::LogLevel::ERROR);
         return;
     }
 
     // Check if the response body is a file path (static content)
     if(response.getIsStatic()) {
         // Get the file path from response body or header
-        const std::string filePath = response.getBody().empty() 
-                                   ? response.getHeader("File-Path").value_or("")
-                                   : response.getBody();
+        const auto file = response.getHeader("File-Path").value_or("");
 
         // Open the file in read-only mode
-        int file_fd = open(filePath.c_str(), O_RDONLY);
+        int file_fd = open(file.c_str(), O_RDONLY);
         if(file_fd < 0) {
-            Logger::getInstance().log("Failed to open static file: " + filePath, Logger::LogLevel::ERROR);
+            std::cerr << "open() failed: " << std::strerror(errno) << std::endl;
+            Logger::getInstance().log("Failed to open static file: " + file, Logger::LogLevel::ERROR);
             return;
         }
 
@@ -279,7 +288,7 @@ void ConnectionHandler::sendResponse(HttpResponse& response) {
             if(fstat(file_fd, &fileStat) < 0) {
                 Logger::getInstance().log("Failed to get file stats.", Logger::LogLevel::ERROR);
                 close(file_fd);
-                sendErrorResponse(http::status::Code::INTERNAL_SERVER_ERROR);
+                sendErrorResponse(response, http::status::Code::INTERNAL_SERVER_ERROR);
                 return;
             }
             totalBytesToSend = fileStat.st_size;
@@ -289,7 +298,7 @@ void ConnectionHandler::sendResponse(HttpResponse& response) {
         if(bytesSent < 0) {
             Logger::getInstance().log("Failed to send static file content.", Logger::LogLevel::ERROR);
             close(file_fd);
-            sendErrorResponse(http::status::Code::INTERNAL_SERVER_ERROR);
+            sendErrorResponse(response, http::status::Code::INTERNAL_SERVER_ERROR);
             return;
         }
         
@@ -310,8 +319,7 @@ void ConnectionHandler::sendResponse(HttpResponse& response) {
 
         ssize_t bytesSent = client_socket->send(body.c_str(), body.length(), MSG_NOSIGNAL);
         if(bytesSent < 0) {
-            Logger::getInstance().log("Failed to send dynamic response body.", Logger::LogLevel::ERROR);
-            sendErrorResponse(http::status::Code::INTERNAL_SERVER_ERROR);
+            sendErrorResponse(response, http::status::Code::INTERNAL_SERVER_ERROR);
             return;
         }
     }
@@ -321,7 +329,7 @@ void ConnectionHandler::sendResponse(HttpResponse& response) {
  * @brief Composes an error response and sends it to the client.
  * @param code The HTTP status code to send.
  */
-void ConnectionHandler::sendErrorResponse(const http::status::Code& code) {
-    HttpResponse response = composer->composeErrorMessage(code);
-    sendResponse(response);
+void ConnectionHandler::sendErrorResponse(HttpResponse& response, const http::status::Code& code) {
+    composer->composeErrorMessage(response, code);
+    client_socket->send(response.getBody().c_str(), response.getBody().length(), MSG_NOSIGNAL);
 }

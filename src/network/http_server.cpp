@@ -147,12 +147,12 @@ void HttpServer::setupDependencies() {
         return std::make_unique<PostResponseBuilder>(composer);
     });
 
+    // Create the Epoll manager
+    epollManager = std::make_unique<EpollManager>();
+    
     // Create the thread pool
     size_t threadCount = Config::getInstance().getThreadCount(); 
     threadPool = std::make_unique<ThreadPool>(threadCount, factory, composer);
-
-    // Create the Epoll manager
-    epollManager = std::make_unique<EpollManager>();
 
     Logger::getInstance().log("Server dependencies initialized.", Logger::LogLevel::INFO);
 }

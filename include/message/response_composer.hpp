@@ -23,7 +23,7 @@ public:
     // Functions //
     
     std::string composeResponseString(const HttpResponse& response) const;
-    HttpResponse composeErrorMessage(http::status::Code code) const;
+    std::string composeErrorMessage(HttpResponse& response, http::status::Code code);
 };
 
 #endif // RESPONSE_COMPOSER_HPP

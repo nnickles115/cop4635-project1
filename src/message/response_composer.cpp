@@ -42,16 +42,22 @@ std::string ResponseComposer::composeResponseString(const HttpResponse& response
  * @param code The HTTP status code.
  * @returns The error message response object.
  */
-HttpResponse ResponseComposer::composeErrorMessage(http::status::Code code) const {
+std::string ResponseComposer::composeErrorMessage(HttpResponse& response, http::status::Code code) {
     // Using the status code as the body
     std::string body = http::status::getCode(code) + " " + http::status::toString(code);
 
-    HttpResponse response;
     response.setStatus(code)
             .setHeader("Content-Type", http::mime::toString(http::mime::Media::TEXT_HTML))
             .setHeader("Content-Length", std::to_string(body.length()))
             .setHeader("Connection", "close")
             .setBody(std::move(body));
 
-    return response;
+    std::ostringstream responseStream;
+    for(const auto& [key, value] : response.getAllHeaders()) {
+        responseStream << key << ": " << value << "\r\n";
+    }
+    responseStream << "\r\n";
+    responseStream << response.getBody();
+
+    return responseStream.str();
 }

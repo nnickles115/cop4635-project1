@@ -79,15 +79,13 @@ ResponseResult GetResponseBuilder::buildResponse(const HttpRequest& request) {
     // Check if the file is too large (using stat for file size).
     bool isStatic = false;
     size_t fileSize = static_cast<size_t>(st.st_size);
-    if(fileSize > MAX_FILE_SIZE) {
-        isStatic = true;
-    }
+    if(fileSize > MAX_FILE_SIZE) isStatic = true;
 
     // Build the response.
     HttpResponse response;
     response.setStatus(http::status::Code::OK)
-            .setHeader("Content-Type", mimeType)
-            .setHeader("Connection", "keep-alive");
+            .setHeader("Content-Type", mimeType);
+            
 
     if(isStatic) {
         // For static files, delegate reading; no in-memory body.

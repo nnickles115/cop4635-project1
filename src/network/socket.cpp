@@ -13,6 +13,7 @@
 #include "socket.hpp"
 
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <sys/sendfile.h>
 #include <unistd.h>
@@ -112,6 +113,30 @@ void Socket::setNonBlocking(bool enable) {
 }
 
 /**
+ * @brief Waits for a socket event to occur.
+ * @param event_mask The event mask to wait for.
+ * @param timeout_ms The timeout in milliseconds.
+ * @return `true` if the event occurred, `false` if a timeout occurred.
+ * @throws std::runtime_error if the polling operation fails.
+ */
+bool Socket::waitForEvent(short event_mask, int timeout_ms) const {
+    struct pollfd pfd;
+    pfd.fd = socket_fd;
+    pfd.events = event_mask;
+
+    // Convert timeout_ms to timespec for ppoll()
+    struct timespec timeout;
+    timeout.tv_sec = timeout_ms / 1000;
+    timeout.tv_nsec = (timeout_ms % 1000) * 1000000;
+
+    int ret = ppoll(&pfd, 1, &timeout, nullptr);
+    if(ret < 0) {
+        throw std::runtime_error("ppoll failed: " + std::string(std::strerror(errno)));
+    }
+    return (ret > 0) && (pfd.revents & event_mask);
+}
+
+/**
  * @brief Binds the socket to a specific address.
  * @param addr The address to bind to.
  * @param addrlen The length of the address.
@@ -171,16 +196,25 @@ ssize_t Socket::recv(void* buf, size_t len, int flags) const {
  * @param len The length of the buffer.
  * @param flags The flags to use for the send operation.
  * @return The number of bytes sent.
- * @throws std::system_error if the data cannot be sent.
+ * @throws std::system_error if the data cannot be sent or timeout occurs.
  */
 ssize_t Socket::send(const void* buf, size_t len, int flags) const {
     size_t totalSent = 0;
     const char* data = static_cast<const char*>(buf);
+    const int timeout_ms = 100; // polling interval
+
     while(totalSent < len) {
         ssize_t bytesSent = ::send(socket_fd, data + totalSent, len - totalSent, flags);
         if(bytesSent < 0) {
-            // If socket is non-blocking, handle temporary unavailability
-            if(errno == EAGAIN || errno == EWOULDBLOCK) continue; // Retry sending for non-fatal errors
+            if(errno == EAGAIN || errno == EWOULDBLOCK) {
+                if(!waitForEvent(POLLOUT, timeout_ms)) {
+                    throw std::runtime_error("Socket not writable within timeout.");
+                }
+                continue;
+            } 
+            else {
+                throw std::runtime_error("send() error: " + std::string(std::strerror(errno)));
+            }
         }
         totalSent += bytesSent;
     }
@@ -193,15 +227,24 @@ ssize_t Socket::send(const void* buf, size_t len, int flags) const {
  * @param offset The offset in the file to start sending from.
  * @param count The number of bytes to send.
  * @return The number of bytes sent.
- * @throws std::system_error if the file cannot be sent.
+ * @throws std::system_error if the file cannot be sent or timeout occurs.
  */
 ssize_t Socket::sendfile(int file_fd, off_t* offset, size_t count) const {
     size_t totalSent = 0;
+    const int timeout_ms = 100;
+
     while(totalSent < count) {
         ssize_t bytesSent = ::sendfile(socket_fd, file_fd, offset, count - totalSent);
         if(bytesSent < 0) {
-            // If socket is non-blocking, handle temporary unavailability
-            if(errno == EAGAIN || errno == EWOULDBLOCK) continue; // Retry sending for non-fatal errors
+            if(errno == EAGAIN || errno == EWOULDBLOCK) {
+                if(!waitForEvent(POLLOUT, timeout_ms)) {
+                    throw std::runtime_error("Socket not writable within timeout during sendfile.");
+                }
+                continue;
+            } 
+            else {
+                throw std::runtime_error("sendfile() error: " + std::string(std::strerror(errno)));
+            }
         }
         totalSent += bytesSent;
     }
