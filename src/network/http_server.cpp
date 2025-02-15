@@ -123,7 +123,7 @@ void HttpServer::registerSignals() {
  */
 void HttpServer::signalHandler(int signum) {
     if(instance) {
-        Logger::getInstance().print("\nReceived SIG" + std::string(sigabbrev_np(signum)));
+        Logger::getInstance().print("\nReceived SIG" + std::string(strsignal(signum)));
         instance->stop();
     }
 }
